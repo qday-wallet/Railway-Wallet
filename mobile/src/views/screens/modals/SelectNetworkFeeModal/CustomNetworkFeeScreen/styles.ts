@@ -1,4 +1,4 @@
-import { styleguide } from '@react-shared';
+import { styleguide } from "@react-shared";
 
 export const styles = {
   wrapper: {
@@ -10,7 +10,7 @@ export const styles = {
   },
   spacer: {
     height: 24,
-    width: '100%',
+    width: "100%",
   },
   submitButton: {
     marginHorizontal: 16,

@@ -1,5 +1,5 @@
-import { StyleSheet } from 'react-native';
-import { styleguide } from '@react-shared';
+import { StyleSheet } from "react-native";
+import { styleguide } from "@react-shared";
 
 export const styles = StyleSheet.create({
   container: {
@@ -11,10 +11,10 @@ export const styles = StyleSheet.create({
     top: 36,
   },
   textWrapper: {
-    flexDirection: 'column',
-    justifyContent: 'center',
+    flexDirection: "column",
+    justifyContent: "center",
     padding: 24,
-    top: '30%',
+    top: "30%",
   },
   errorShowMore: {
     marginTop: 12,
@@ -28,15 +28,15 @@ export const styles = StyleSheet.create({
   loadingText: {
     ...styleguide.typography.caption,
     color: styleguide.colors.text(),
-    textAlign: 'center',
+    textAlign: "center",
     paddingHorizontal: 16,
   },
   progressBarWrapper: {
     marginTop: 32,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
   },
   progressBar: {},
   retryContainer: {

@@ -1,7 +1,7 @@
-import { RailgunWalletBalanceBucket } from '@railgun-community/shared-models';
-import React, { useState } from 'react';
-import { PinEntryPanel } from '@components/inputs/PinEntryPanel/PinEntryPanel';
-import { SendERC20sNumberInput } from '@components/views/ERC20AmountsNumPadView/SendERC20sNumberInput/SendERC20sNumberInput';
+import { RailgunWalletBalanceBucket } from "@railgun-community/shared-models";
+import React, { useState } from "react";
+import { PinEntryPanel } from "@components/inputs/PinEntryPanel/PinEntryPanel";
+import { SendERC20sNumberInput } from "@components/views/ERC20AmountsNumPadView/SendERC20sNumberInput/SendERC20sNumberInput";
 import {
   compareTokens,
   ERC20Amount,
@@ -12,8 +12,8 @@ import {
   TransactionType,
   useRailgunFees,
   useValidateNumEntry,
-} from '@react-shared';
-import { HapticSurface, triggerHaptic } from '@services/util/haptic-service';
+} from "@react-shared";
+import { HapticSurface, triggerHaptic } from "@services/util/haptic-service";
 
 export const useSendERC20sNumInput = (
   transactionType: TransactionType,
@@ -29,9 +29,9 @@ export const useSendERC20sNumInput = (
   isRailgunBalance: boolean,
   balanceBucketFilter: RailgunWalletBalanceBucket[],
   requiresApproval: boolean,
-  focused: boolean,
+  focused: boolean
 ) => {
-  const [numEntryString, setNumEntryString] = useState('');
+  const [numEntryString, setNumEntryString] = useState("");
 
   const { shieldFee } = useRailgunFees(transactionType);
 
@@ -43,7 +43,7 @@ export const useSendERC20sNumInput = (
     tokenBalance,
     transactionType,
     currentToken,
-    isRailgunBalance,
+    isRailgunBalance
   );
 
   const onTapPanelButton = (num: number) => {
@@ -60,7 +60,7 @@ export const useSendERC20sNumInput = (
   };
 
   const entryHasDecimal = () => {
-    return numEntryString.includes('.');
+    return numEntryString.includes(".");
   };
 
   const onTapDecimalButton = () => {
@@ -71,12 +71,12 @@ export const useSendERC20sNumInput = (
       return;
     }
     if (!numEntryString.length) {
-      const newString = '0.';
+      const newString = "0.";
       triggerHaptic(HapticSurface.NumPad);
       updateAmount(newString);
       return;
     }
-    const newString = numEntryString + '.';
+    const newString = numEntryString + ".";
     if (isNaN(Number(newString))) {
       return;
     }
@@ -111,7 +111,7 @@ export const useSendERC20sNumInput = (
 
     const newString = formatUnitFromHexString(
       adjustedMaxAmount,
-      currentToken.decimals,
+      currentToken.decimals
     );
     triggerHaptic(HapticSurface.SelectItem);
     updateAmount(newString);
@@ -119,7 +119,7 @@ export const useSendERC20sNumInput = (
 
   const onTapClearButton = () => {
     triggerHaptic(HapticSurface.SelectItem);
-    updateAmount('');
+    updateAmount("");
   };
 
   const updateAmount = (amount: string) => {
@@ -135,7 +135,7 @@ export const useSendERC20sNumInput = (
       token: currentToken,
       amountString: stringEntryToBigInt(
         numEntryString,
-        currentToken.decimals,
+        currentToken.decimals
       ).toString(),
     };
     const newTokenAmounts: ERC20Amount[] = [];

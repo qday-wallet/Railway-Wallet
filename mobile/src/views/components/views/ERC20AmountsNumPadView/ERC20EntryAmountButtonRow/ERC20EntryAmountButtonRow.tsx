@@ -1,9 +1,9 @@
-import { isDefined } from '@railgun-community/shared-models';
-import React, { ReactNode, useState } from 'react';
-import { Text, View } from 'react-native';
-import { formatNumberToLocale } from '@react-shared';
-import { PasteTooltip } from '@views/components/animations/PasteTooltip/PasteTooltip';
-import { styles } from './styles';
+import { isDefined } from "@railgun-community/shared-models";
+import React, { ReactNode, useState } from "react";
+import { Text, View } from "react-native";
+import { formatNumberToLocale } from "@react-shared";
+import { PasteTooltip } from "@views/components/animations/PasteTooltip/PasteTooltip";
+import { styles } from "./styles";
 
 type Props = {
   numEntryString: string;
@@ -47,15 +47,15 @@ export const ERC20EntryAmountButtonRow: React.FC<Props> = ({
           }
           style={[
             styles.title,
-            numEntryString === '' ? styles.placeholderTitle : undefined,
-            numEntryString === '' && focused
+            numEntryString === "" ? styles.placeholderTitle : undefined,
+            numEntryString === "" && focused
               ? styles.placeholderTitleFocused
               : undefined,
           ]}
           numberOfLines={1}
           adjustsFontSizeToFit
         >
-          {numEntryString === ''
+          {numEntryString === ""
             ? placeholder
             : formatNumberToLocale(numEntryString)}
         </Text>

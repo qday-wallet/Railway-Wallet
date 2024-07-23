@@ -1,26 +1,26 @@
-import { isDefined } from '@railgun-community/shared-models';
-import React from 'react';
-import { Alert, View } from 'react-native';
-import RNRestart from 'react-native-restart';
-import { AlertProps } from '@components/alerts/GenericAlert/GenericAlert';
-import { ButtonTextOnly } from '@components/buttons/ButtonTextOnly/ButtonTextOnly';
+import { isDefined } from "@railgun-community/shared-models";
+import React from "react";
+import { Alert, View } from "react-native";
+import RNRestart from "react-native-restart";
+import { AlertProps } from "@components/alerts/GenericAlert/GenericAlert";
+import { ButtonTextOnly } from "@components/buttons/ButtonTextOnly/ButtonTextOnly";
 import {
   AppDispatch,
   AppSettingsService,
   Currency,
   POIDocumentation,
-} from '@react-shared';
-import { openExternalLinkAlert } from '@services/util/alert-service';
-import { HapticSurface, triggerHaptic } from '@services/util/haptic-service';
-import { styles } from './utilsStyles';
+} from "@react-shared";
+import { openExternalLinkAlert } from "@services/util/alert-service";
+import { HapticSurface, triggerHaptic } from "@services/util/haptic-service";
+import { styles } from "./utilsStyles";
 
 export const createUpdateSettingsAlert = (currency: Currency) => {
   Alert.alert(
-    'Settings updated',
-    'Railway will now restart to apply this setting.',
+    "Settings updated",
+    "Railway will now restart to apply this setting.",
     [
       {
-        text: 'Ok',
+        text: "Ok",
         onPress: async () => {
           await AppSettingsService.setCurrency(currency);
           triggerHaptic(HapticSurface.EditSuccess);
@@ -28,10 +28,10 @@ export const createUpdateSettingsAlert = (currency: Currency) => {
         },
       },
       {
-        text: 'Cancel',
-        style: 'destructive',
+        text: "Cancel",
+        style: "destructive",
       },
-    ],
+    ]
   );
 };
 
@@ -42,7 +42,7 @@ export const createPOIDisclaimerAlert = (
   dispatch: AppDispatch,
   poiDocumentation?: POIDocumentation,
   customOnSubmit?: () => void,
-  customSubmitTitle?: string,
+  customSubmitTitle?: string
 ) => {
   const handleRedirect = (url: string) => () => {
     openExternalLinkAlert(url, dispatch);
@@ -52,7 +52,7 @@ export const createPOIDisclaimerAlert = (
     show: true,
     title,
     message,
-    submitTitle: customSubmitTitle ?? 'I understand',
+    submitTitle: customSubmitTitle ?? "I understand",
     footerView: isDefined(poiDocumentation) ? (
       <View style={styles.footerView}>
         <ButtonTextOnly

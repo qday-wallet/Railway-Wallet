@@ -1,7 +1,7 @@
-import React from 'react';
-import { Animated, Image } from 'react-native';
-import { ImageSwirl } from '@react-shared';
-import { styles } from './styles';
+import React from "react";
+import { Animated, Image } from "react-native";
+import { ImageSwirl } from "@react-shared";
+import { styles } from "./styles";
 
 type Props = {
   animate: boolean;
@@ -26,7 +26,7 @@ export const LoadingSwirl: React.FC<Props> = ({ animate }) => {
           duration: ANIMATION_DURATION,
           useNativeDriver: false,
         }),
-      ]),
+      ])
     ).start();
   } else {
     Animated.timing(widthPct, {
@@ -43,8 +43,8 @@ export const LoadingSwirl: React.FC<Props> = ({ animate }) => {
           width: widthPct.interpolate({
             inputRange: [0, 1],
             outputRange: [
-              SWIRL_DEFAULT_LOADING_WIDTH_PCT + '%',
-              SWIRL_DEFAULT_LOADING_WIDTH_PCT * 1.05 + '%',
+              SWIRL_DEFAULT_LOADING_WIDTH_PCT + "%",
+              SWIRL_DEFAULT_LOADING_WIDTH_PCT * 1.05 + "%",
             ],
           }),
         },
