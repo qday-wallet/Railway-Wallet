@@ -1,4 +1,4 @@
-import { styleguide } from '@react-shared';
+import { styleguide } from "@react-shared";
 
 export const styles = {
   addressInput: {
@@ -7,14 +7,14 @@ export const styles = {
     borderColor: styleguide.colors.inputBorder,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    width: '100%',
+    width: "100%",
   },
   addressInputError: {
     borderBottomColor: styleguide.colors.error(),
   },
   knownWalletContainer: {
-    display: 'flex',
-    alignItems: 'center',
+    display: "flex",
+    alignItems: "center",
     marginTop: 6,
     marginLeft: 6,
   },
@@ -38,17 +38,17 @@ export const styles = {
   },
   buttonLabel: {
     ...styleguide.typography.label,
-    textTransform: 'none' as 'none',
+    textTransform: "none" as "none",
   },
   inputRightView: {
-    display: 'flex',
+    display: "flex",
   },
   inputSpinner: {
     marginRight: 12,
   },
   inputInsetButton: {
-    justifyContent: 'center',
-    width: 'fit-content',
+    justifyContent: "center",
+    width: "fit-content",
     height: 32,
   },
 };

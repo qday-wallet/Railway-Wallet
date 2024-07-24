@@ -1,9 +1,9 @@
-import { isDefined } from '@railgun-community/shared-models';
+import { isDefined } from "@railgun-community/shared-models";
 import {
   CoinPaprikaApiEndpoint,
   getCoinPaprikaData,
-} from './coinpaprika-service';
-import { getCoinPaprikaTokenID } from './coinpaprika-token';
+} from "./coinpaprika-service";
+import { getCoinPaprikaTokenID } from "./coinpaprika-token";
 
 type TokenPrice = {
   price: number;
@@ -18,7 +18,7 @@ export type CoinPaprikaQuery = {
 };
 
 export const paprikaPriceLookup = async (
-  tokenQueries: CoinPaprikaQuery[],
+  tokenQueries: CoinPaprikaQuery[]
 ): Promise<TokenPrice[]> => {
   const priceResults: TokenPrice[] = [];
   for (const { symbol, tokenAddress } of tokenQueries) {
@@ -28,7 +28,7 @@ export const paprikaPriceLookup = async (
     }
     const tokenTicker = await getCoinPaprikaData(
       CoinPaprikaApiEndpoint.Tickers,
-      tokenID,
+      tokenID
     );
     if (isDefined(tokenTicker)) {
       const { data } = tokenTicker;

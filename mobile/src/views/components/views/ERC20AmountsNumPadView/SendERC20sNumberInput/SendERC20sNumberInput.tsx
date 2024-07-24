@@ -1,10 +1,10 @@
 import {
   isDefined,
   RailgunWalletBalanceBucket,
-} from '@railgun-community/shared-models';
-import React from 'react';
-import { Text, View } from 'react-native';
-import { ButtonTextOnly } from '@components/buttons/ButtonTextOnly/ButtonTextOnly';
+} from "@railgun-community/shared-models";
+import React from "react";
+import { Text, View } from "react-native";
+import { ButtonTextOnly } from "@components/buttons/ButtonTextOnly/ButtonTextOnly";
 import {
   ERC20Token,
   formatNumberToLocaleWithMinDecimals,
@@ -13,10 +13,10 @@ import {
   TransactionType,
   useERC20Balance,
   useReduxSelector,
-} from '@react-shared';
-import { ERC20EntryAmountButtonRow } from '../ERC20EntryAmountButtonRow/ERC20EntryAmountButtonRow';
-import { SelectTokenInlineButton } from '../SelectTokenInlineButton/SelectTokenInlineButton';
-import { styles } from './styles';
+} from "@react-shared";
+import { ERC20EntryAmountButtonRow } from "../ERC20EntryAmountButtonRow/ERC20EntryAmountButtonRow";
+import { SelectTokenInlineButton } from "../SelectTokenInlineButton/SelectTokenInlineButton";
+import { styles } from "./styles";
 
 type Props = {
   token: Optional<ERC20Token>;
@@ -49,14 +49,14 @@ export const SendERC20sNumberInput: React.FC<Props> = ({
   focused,
   balanceBucketFilter,
 }) => {
-  const { network } = useReduxSelector('network');
-  const { wallets } = useReduxSelector('wallets');
+  const { network } = useReduxSelector("network");
+  const { wallets } = useReduxSelector("wallets");
 
   const { tokenBalance } = useERC20Balance(
     wallets.active,
     token,
     isRailgunBalance,
-    balanceBucketFilter,
+    balanceBucketFilter
   );
 
   const leftView = () => {
@@ -101,9 +101,9 @@ export const SendERC20sNumberInput: React.FC<Props> = ({
               ? getTokenDisplayNameShort(
                   token,
                   wallets.available,
-                  network.current.name,
+                  network.current.name
                 )
-              : 'N/A'
+              : "N/A"
           }
           viewStyle={styles.buttonTextOnlyContent}
           contentStyle={styles.buttonTextOnlyContent}
@@ -121,15 +121,15 @@ export const SendERC20sNumberInput: React.FC<Props> = ({
 
   const balanceText = (token: ERC20Token) => {
     return `${
-      isRailgunBalance ? 'Private' : 'Public'
+      isRailgunBalance ? "Private" : "Public"
     } ${getTokenDisplayNameShort(
       token,
       wallets.available,
-      network.current.name,
+      network.current.name
     )} balance: ${
       isDefined(tokenBalance)
         ? formatUnitFromHexStringToLocale(tokenBalance, token.decimals)
-        : 'Loading...'
+        : "Loading..."
     }`;
   };
 

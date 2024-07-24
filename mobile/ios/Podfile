@@ -18,6 +18,11 @@ target 'Railway' do
 
   flags = get_default_flags()
 
+  pod 'Firebase', :modular_headers => true
+  pod 'FirebaseCore',:modular_headers => true
+  pod 'GoogleUtilities', :modular_headers => true
+  $RNFirebaseAsStaticFramework = true
+
   use_react_native!(
     :path => config[:reactNativePath],
 

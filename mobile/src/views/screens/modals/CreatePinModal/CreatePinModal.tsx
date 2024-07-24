@@ -1,143 +1,145 @@
-import { isDefined } from '@railgun-community/shared-models';
-import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, Modal, Text, View } from 'react-native';
-import { ButtonTextOnly } from '@components/buttons/ButtonTextOnly/ButtonTextOnly';
-import { SwirlBackground } from '@components/images/SwirlBackground/SwirlBackground';
-import { PinEntryDots } from '@components/inputs/PinEntryDots/PinEntryDots';
-import { PinEntryPanel } from '@components/inputs/PinEntryPanel/PinEntryPanel';
+import { isDefined } from "@railgun-community/shared-models";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Dimensions,
+  Image,
+  Modal,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+//
+import EncryptedStorage from "react-native-encrypted-storage";
+import { ButtonTextOnly } from "@components/buttons/ButtonTextOnly/ButtonTextOnly";
+import { SwirlBackground } from "@components/images/SwirlBackground/SwirlBackground";
+import { PinEntryDots } from "@components/inputs/PinEntryDots/PinEntryDots";
+import { PinEntryPanel } from "@components/inputs/PinEntryPanel/PinEntryPanel";
 import {
   BiometricsAuthResponse,
   ImageSwirl,
   setAuthKey,
   useAppDispatch,
   useReduxSelector,
-} from '@react-shared';
+} from "@react-shared";
 import {
   getOrCreateDbEncryptionKey,
   storeNewDbEncryptionKey,
-} from '@services/core/db';
+} from "@services/core/db";
 import {
   biometricsAuthenticate,
   getBiometryType,
-} from '@services/security/biometrics-service';
+} from "@services/security/biometrics-service";
 import {
   compareEncryptedPin,
   setEncryptedPin,
   setHasBiometricsEnabled,
-} from '@services/security/secure-app-service';
-import { HapticSurface, triggerHaptic } from '@services/util/haptic-service';
-import { imageHeightFromDesiredWidth } from '@utils/image-utils';
-import { ErrorDetailsModal } from '../ErrorDetailsModal/ErrorDetailsModal';
-import { styles } from './styles';
+} from "@services/security/secure-app-service";
+import { HapticSurface, triggerHaptic } from "@services/util/haptic-service";
+import * as WebBrowser from "@toruslabs/react-native-web-browser";
+import { imageHeightFromDesiredWidth } from "@utils/image-utils";
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+import Web3Auth, {
+  ChainNamespace,
+  LOGIN_PROVIDER,
+  OPENLOGIN_NETWORK,
+} from "@web3auth/react-native-sdk";
+import { ErrorDetailsModal } from "../ErrorDetailsModal/ErrorDetailsModal";
+import GoogleIcon from "./google.png";
+import { styles } from "./styles";
 
+import "@ethersproject/shims";
+const scheme = "railway"; // Or your desired app redirection scheme
+const redirectUrl = `${scheme}://login`;
+const clientId =
+  "BMqggIUuV0GVIw86MF90BqsxlkVi6cy-sOByat7_GdwaJfs_p-t-UOTpyOA91OiCmEbSHdYIDOIolUvAu69hAU0"; // get from https://dashboard.web3auth.io
+
+const chainConfig = {
+  chainNamespace: ChainNamespace.EIP155,
+  chainId: "0xaa36a7",
+  rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+  // Avoid using public rpcTarget in production.
+  // Use services like Infura, Quicknode etc
+  displayName: "Ethereum Sepolia Testnet",
+  blockExplorerUrl: "https://sepolia.etherscan.io",
+  ticker: "ETH",
+  tickerName: "Ethereum",
+  decimals: 18,
+  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+};
+
+const ethereumPrivateKeyProvider = new EthereumPrivateKeyProvider({
+  config: {
+    chainConfig,
+  },
+});
+
+const web3auth = new Web3Auth(WebBrowser, EncryptedStorage, {
+  clientId,
+  redirectUrl,
+  network: OPENLOGIN_NETWORK.SAPPHIRE_DEVNET, // or other networks
+});
+
+///
 type Props = {
   show: boolean;
   dismiss: () => void;
+  navigation: any;
 };
 
-const PIN_LENGTH = 6;
-
-export const CreatePinModal: React.FC<Props> = ({ show, dismiss }) => {
-  const { authKey } = useReduxSelector('authKey');
-  const dispatch = useAppDispatch();
-
-  const [enteredPin, setEnteredPin] = useState('');
-  const [firstEntryPin, setFirstEntryPin] = useState('');
+export const CreatePinModal: React.FC<Props> = ({
+  show,
+  dismiss,
+  navigation,
+}) => {
+  const [enteredPin, setEnteredPin] = useState("");
   const [error, setError] = useState<Optional<Error>>();
-  const [noticeText, setNoticeText] = useState('');
   const inputFrozen = useRef(false);
   const [showErrorDetailsModal, setShowErrorDetailsModal] = useState(false);
 
-  const openErrorDetailsModal = () => {
-    setShowErrorDetailsModal(true);
-  };
-  const dismissErrorDetailsModal = () => {
-    setShowErrorDetailsModal(false);
+  ////
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [provider, setProvider] = useState<any>(null);
+
+  useEffect(() => {
+    const init = async () => {
+      await web3auth.init();
+      console.log("=======web3auth.privKeydddddddd", web3auth.privKey);
+      if (web3auth.privKey) {
+        await ethereumPrivateKeyProvider.setupProvider(web3auth.privKey);
+        setEnteredPin(web3auth.privKey);
+        setProvider(ethereumPrivateKeyProvider);
+        setLoggedIn(true);
+      }
+    };
+    init();
+  }, []);
+
+  const login = async () => {
+    try {
+      if (!web3auth.ready) {
+        return;
+      }
+
+      await web3auth.login({
+        loginProvider: LOGIN_PROVIDER.GOOGLE,
+      });
+
+      if (web3auth.privKey) {
+        await ethereumPrivateKeyProvider.setupProvider(web3auth.privKey);
+        setEnteredPin(web3auth.privKey);
+        setProvider(ethereumPrivateKeyProvider);
+        setLoggedIn(true);
+      }
+    } catch (e: any) {}
   };
 
   useEffect(() => {
-    const lockFirstEntry = () => {
-      setFirstEntryPin(enteredPin);
-      setError(undefined);
-      setNoticeText('Please re-enter your PIN.');
-      setEnteredPin('');
-    };
-    const confirmAndSubmit = async () => {
-      if (enteredPin !== firstEntryPin) {
-        setFirstEntryPin('');
-        setError(new Error('Entry did not match. Please select a new PIN.'));
-        setNoticeText('');
-        setEnteredPin('');
-        return;
-      }
-      inputFrozen.current = true;
-
-      const dbEncryptionKey = await getOrCreateDbEncryptionKey();
-      const encryptedPin = await setEncryptedPin(enteredPin);
-      if (await compareEncryptedPin(enteredPin)) {
-        const previousAuthKey = authKey.key;
-        dispatch(setAuthKey(encryptedPin));
-        await storeNewDbEncryptionKey(
-          encryptedPin,
-          dbEncryptionKey,
-          previousAuthKey,
-        );
-        await tryEnableBiometry();
-        dismiss();
-      }
-    };
-    if (show && enteredPin.length) {
-      setError(undefined);
-      if (enteredPin.length === PIN_LENGTH) {
-        const isFirstEntryState = firstEntryPin === '';
-        if (isFirstEntryState) {
-          lockFirstEntry();
-        } else {
-          // eslint-disable-next-line @typescript-eslint/no-floating-promises
-          confirmAndSubmit();
-        }
-      }
+    if (show && enteredPin) {
+      dismiss();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enteredPin, show]);
 
-  const tryEnableBiometry = async () => {
-    const biometryType = await getBiometryType();
-    if (!biometryType) {
-      return;
-    }
-    const authResponse = await biometricsAuthenticate();
-    const isEnabled = authResponse !== BiometricsAuthResponse.Denied;
-    await setHasBiometricsEnabled(isEnabled);
-  };
-
-  const onTapPanelButton = (num: number) => {
-    if (inputFrozen.current) {
-      return;
-    }
-
-    if (enteredPin.length < PIN_LENGTH) {
-      triggerHaptic(HapticSurface.NumPad);
-      setEnteredPin(enteredPin + String(num));
-    }
-  };
-
-  const onTapBackspaceButton = () => {
-    if (inputFrozen.current) {
-      return;
-    }
-
-    if (enteredPin.length > 0) {
-      triggerHaptic(HapticSurface.BackButton);
-      removeOneCharFromPin();
-    }
-  };
-
-  const removeOneCharFromPin = () => {
-    setEnteredPin(enteredPin.slice(0, -1));
-  };
-
-  const windowWidth = Dimensions.get('window').width;
+  const windowWidth = Dimensions.get("window").width;
   const swirlWidth = windowWidth * 0.8;
   const swirlHeight = imageHeightFromDesiredWidth(ImageSwirl(), swirlWidth);
 
@@ -152,46 +154,23 @@ export const CreatePinModal: React.FC<Props> = ({ show, dismiss }) => {
           }}
         />
         <View style={[styles.pinTitleDotsWrapper]}>
-          <Text style={styles.titleText}>
-            {!firstEntryPin ? 'Set PIN' : 'Confirm PIN'}
-          </Text>
-          <PinEntryDots enteredPinLength={enteredPin.length} />
-        </View>
-        <View style={styles.noticeTextWrapper}>
-          {noticeText !== '' && (
-            <Text style={styles.noticeText}>{noticeText}</Text>
-          )}
-          {isDefined(error) && (
-            <>
-              <Text style={styles.errorText}>
-                {error.message}{' '}
-                <Text
-                  style={styles.errorShowMore}
-                  onPress={openErrorDetailsModal}
-                >
-                  (show more)
-                </Text>
-              </Text>
-              <ErrorDetailsModal
-                error={error}
-                show={showErrorDetailsModal}
-                onDismiss={dismissErrorDetailsModal}
-              />
-            </>
-          )}
+          <Text style={styles.titleText}>{"LOGIN WITH GOOGLE"}</Text>
         </View>
         <View style={styles.pinEntryPanelWrapper}>
-          <PinEntryPanel
-            enteredPinLength={enteredPin.length}
-            onTapPanelButton={onTapPanelButton}
-            onTapBackspaceButton={onTapBackspaceButton}
-          />
+          <TouchableOpacity onPress={() => login()}>
+            <Image source={GoogleIcon} style={styles.googleIcon} />
+          </TouchableOpacity>
         </View>
         <View style={styles.bottomButtons}>
           <View style={styles.bottomButton}>
             <ButtonTextOnly
               title="Cancel"
-              onTap={dismiss}
+              onTap={() => {
+                dismiss();
+                setTimeout(() => {
+                  navigation.goBack();
+                }, 150);
+              }}
               labelStyle={styles.bottomButtonLabel}
             />
           </View>

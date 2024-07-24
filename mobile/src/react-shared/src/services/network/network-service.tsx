@@ -5,34 +5,34 @@ import {
   NETWORK_CONFIG,
   NetworkName,
   TXIDVersion,
-} from '@railgun-community/shared-models';
-import { ProviderLoader } from '../../bridge/bridge-providers';
+} from "@railgun-community/shared-models";
+import { ProviderLoader } from "../../bridge/bridge-providers";
 import {
   getWalletTransactionHistory,
   refreshRailgunBalances,
-} from '../../bridge/bridge-wallets';
-import { SharedConstants } from '../../config/shared-constants';
+} from "../../bridge/bridge-wallets";
+import { SharedConstants } from "../../config/shared-constants";
 import {
   PullBalances,
   PullPrices,
-} from '../../hooks/balances/useBalancePriceRefresh';
-import { ProviderNodeType } from '../../models';
+} from "../../hooks/balances/useBalancePriceRefresh";
+import { ProviderNodeType } from "../../models";
 import {
   setNetworkByName,
   setNetworkFees,
-} from '../../redux-store/reducers/network-reducer';
-import { closeShieldPOICountdownToast } from '../../redux-store/reducers/shield-poi-countdown-toast-reducer';
-import { AppDispatch, store } from '../../redux-store/store';
-import { logDev, logDevError } from '../../utils/logging';
-import { getSupportedNetworks, networkForName } from '../../utils/networks';
-import { RailgunTransactionHistorySync } from '../history/railgun-transaction-history-sync';
-import { ProviderService } from '../providers/provider-service';
-import { AppSettingsService } from '../settings/app-settings-service';
-import { StorageService } from '../storage/storage-service';
-import { PendingTransactionWatcher } from '../transactions/pending-transaction-watcher';
-import { displayShieldCountdownTxsIfNeeded } from '../transactions/poi-shield-countdown';
-import { refreshReceivedTransactionWatchers } from '../transactions/transfer-watcher-service';
-import { WalletTokenService } from '../wallet/wallet-token-service';
+} from "../../redux-store/reducers/network-reducer";
+import { closeShieldPOICountdownToast } from "../../redux-store/reducers/shield-poi-countdown-toast-reducer";
+import { AppDispatch, store } from "../../redux-store/store";
+import { logDev, logDevError } from "../../utils/logging";
+import { getSupportedNetworks, networkForName } from "../../utils/networks";
+import { RailgunTransactionHistorySync } from "../history/railgun-transaction-history-sync";
+import { ProviderService } from "../providers/provider-service";
+import { AppSettingsService } from "../settings/app-settings-service";
+import { StorageService } from "../storage/storage-service";
+import { PendingTransactionWatcher } from "../transactions/pending-transaction-watcher";
+import { displayShieldCountdownTxsIfNeeded } from "../transactions/poi-shield-countdown";
+import { refreshReceivedTransactionWatchers } from "../transactions/transfer-watcher-service";
+import { WalletTokenService } from "../wallet/wallet-token-service";
 
 export class NetworkService {
   dispatch: AppDispatch;
@@ -48,8 +48,10 @@ export class NetworkService {
       SharedConstants.BACKUP_DEFAULT_NETWORK_NAME;
 
     const supportedNetworks = getSupportedNetworks();
+    console.log("========networks", supportedNetworks);
+
     const defaultSupportedNetwork =
-      supportedNetworks.find(n => n.name === defaultNetworkName) ??
+      supportedNetworks.find((n) => n.name === defaultNetworkName) ??
       supportedNetworks[0];
 
     return defaultSupportedNetwork.name;
@@ -57,7 +59,7 @@ export class NetworkService {
 
   async selectNetwork(
     networkName: NetworkName,
-    feesSerialized: FeesSerialized,
+    feesSerialized: FeesSerialized
   ) {
     const network = networkForName(networkName);
     if (!network) {
@@ -78,7 +80,7 @@ export class NetworkService {
     newNetworkName: NetworkName,
     shouldFallbackOnError: boolean,
     pullPrices: PullPrices,
-    pullBalances: PullBalances,
+    pullBalances: PullBalances
   ) {
     const newNetwork = networkForName(newNetworkName);
     if (!newNetwork) {
@@ -87,7 +89,7 @@ export class NetworkService {
 
     const feesSerialized = await ProviderLoader.loadEngineProvider(
       newNetworkName,
-      this.dispatch,
+      this.dispatch
     );
 
     try {
@@ -100,18 +102,18 @@ export class NetworkService {
         this.dispatch,
         newNetwork,
         getWalletTransactionHistory,
-        refreshRailgunBalances,
+        refreshRailgunBalances
       );
 
       await PendingTransactionWatcher.loadTransactionsAndWatchPending(
-        newNetwork,
+        newNetwork
       );
 
       const activeWallet = wallets.active;
       await refreshReceivedTransactionWatchers(
         activeWallet,
         newNetwork,
-        this.dispatch,
+        this.dispatch
       );
 
       const walletTokenService = new WalletTokenService(this.dispatch);
@@ -120,18 +122,19 @@ export class NetworkService {
       logDevError(err.message);
       if (shouldFallbackOnError) {
         logDev(
-          `Failed to load new network ${newNetworkName}, falling back to previous network ${currentNetworkName}.`,
+          `Failed to load new network ${newNetworkName}, falling back to previous network ${currentNetworkName}.`
         );
 
         await this.tryChangeNetwork(
           newNetworkName,
           currentNetworkName,
-          false, pullPrices,
-          pullBalances,
+          false,
+          pullPrices,
+          pullBalances
         );
       }
 
-      throw new Error('Failed to try changing networks', { cause: err });
+      throw new Error("Failed to try changing networks", { cause: err });
     }
 
     if (currentNetworkName !== NetworkName.Ethereum) {
@@ -146,7 +149,7 @@ export class NetworkService {
       if (!network.supportsV3) {
         await AppSettingsService.setTXIDVersion(
           this.dispatch,
-          TXIDVersion.V2_PoseidonMerkle,
+          TXIDVersion.V2_PoseidonMerkle
         );
       }
     }
@@ -154,11 +157,12 @@ export class NetworkService {
 
   async loadNetworkFromStorage(): Promise<Network> {
     const value = await StorageService.getItem(
-      SharedConstants.SELECTED_NETWORK,
+      SharedConstants.SELECTED_NETWORK
     );
     let loadedNetworkName = NetworkService.getDefaultNetworkName();
     if (isDefined(value)) {
       const supportedNetworks = getSupportedNetworks();
+      console.log("========networks", supportedNetworks);
       for (const network of supportedNetworks) {
         if (network.name === value) {
           loadedNetworkName = network.name;
@@ -181,7 +185,7 @@ export class NetworkService {
     const networkName = network.name;
     await ProviderService.loadFrontendProviderForNetwork(
       networkName,
-      ProviderNodeType.FullNode,
+      ProviderNodeType.FullNode
     );
   }
 }
